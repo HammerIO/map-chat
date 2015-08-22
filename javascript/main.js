@@ -6,22 +6,11 @@ var retryCount = 10;
 var urlHashTopic = location.hash ? location.hash.substring(1).toLowerCase() : null;
 var topic = urlHashTopic ? urlHashTopic : "main";
 
+var db = createHammer()
+var appId = "b4aUPLE7"
+
 function initialiseEventBus(){
-    eb = new vertx.EventBus("http://localhost:8080/chat");
-
-    eb.onopen = function () {
-        subscribe(topic);
-    };
-
-    eb.onclose = function(){
-        if (retryCount) {
-            retryCount--;
-            console.log('Connection lost, scheduling reconnect');
-            setTimeout(initialiseEventBus, 1000);
-        } else{
-            Materialize.toast('Connection lost, please refresh :( ', 10000);
-        }
-    };
+    subscribe(topic)
 }
 
 function sendMessage(topic, input) {
@@ -32,25 +21,17 @@ function sendMessage(topic, input) {
 }
 
 function publish(address, message) {
-    if (eb) {
-        var json = createMessage(message);
-        eb.publish(address, json);
-    }
+    var json = createMessage(message);        
+    db.insert(appId + topic, JSON.stringify(json))
 }
 
 function subscribe(address) {
-    if (eb) {
-        eb.registerHandler(address, function (msg) {
-            if (msg.newSessionId) {
-                retryCount = 5;
-                mySessionId = msg.newSessionId;
-                publish(topic,""); // Sending a first empty message
-                setupWatchPosition();
-            } else {
-                displayMessageOnMap(msg);
-            }
-        });
-    }
+    db.live(function(db){
+      db.query(appId + topic,1).then(function(resp){
+        if(resp.result)
+          displayMessageOnMap(JSON.parse(resp.result.value))
+      })
+    })
 }
 
 $( document ).ready(function() {
