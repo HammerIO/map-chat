@@ -1,7 +1,4 @@
 
-var eb;
-var retryCount = 10;
-
 // Support dynamic topic registration by #word
 var urlHashTopic = location.hash ? location.hash.substring(1).toLowerCase() : null;
 var topic = urlHashTopic ? urlHashTopic : "main";
@@ -10,6 +7,8 @@ var db = createHammer()
 var appId = "b4aUPLE7"
 
 function initialiseEventBus(){
+    mySessionId = uid()
+    setupWatchPosition()
     subscribe(topic)
 }
 
@@ -27,7 +26,7 @@ function publish(address, message) {
 
 function subscribe(address) {
     db.live(function(db){
-      db.query(appId + topic,1).then(function(resp){
+      db.query(appId + topic,1).then(function(resp){      
         if(resp.result)
           displayMessageOnMap(JSON.parse(resp.result.value))
       })
