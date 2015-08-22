@@ -25,4 +25,4 @@ A super simple location based chat, forked from [idoco](https://github.com/idoco
 - Feel free to fork this project and suggest new features as pull requests.
 
 ## [Demo](http://hammerio.github.io/map-chat)
-This demo is hosted on GitHub pages and uses a single core Azure instance as the Vert.x SockJS server.
+This demo is hosted on GitHub pages and HammerDB as backend.
