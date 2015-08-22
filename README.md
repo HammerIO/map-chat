@@ -12,23 +12,17 @@ A super simple location based chat
  - Simply add this `iframe` to your website:
 ```html
 <iframe id="mapchat" type="text/html" width="640" height="480"
-  src="http://idoco.github.io/map-chat/#myTopic"
+  src="http://hammerio.github.io/map-chat/#myTopic"
   frameborder="0"></iframe>
 ```
 - The minimum recommended size it 640x480.
 - It is recommended to embed private map chats by using a unique #topic.
 - [See example.](http://idoco.svbtle.com/embed-mapchat-in-your-website)
 
-## How to deploy your own instance
-- [Have Vert.x (2.1.5) on your path](http://vertx.io/vertx2/install.html).
-- Run the server with "vertx run ChatVerticle.java".
-- Open index.html.
-- Chat.
-
 ## Contributing to MapChat
 - Use GitHub Issues to report bugs and suggest new features. 
 - Please search the existing issues for your bug and create a new one only if the issue is not yet tracked!
 - Feel free to fork this project and suggest new features as pull requests.
 
-## [Demo](http://idoco.github.io/map-chat)
+## [Demo](http://hammerio.github.io/map-chat)
 This demo is hosted on GitHub pages and uses a single core Azure instance as the Vert.x SockJS server.
