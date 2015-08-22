@@ -1,5 +1,5 @@
 # MapChat with HammerDB
-A super simple location based chat, forked from [idoco](https://github.com/idoco/map-chat), and modified to use [HammerDB](http://hammerio.com).
+A super simple location based chat, forked from [idoco](https://github.com/idoco/map-chat) and modified to use [HammerDB](http://hammerio.com).
 
 ![](https://raw.githubusercontent.com/idoco/map-chat/master/map-chat.png)
 
@@ -25,4 +25,4 @@ A super simple location based chat, forked from [idoco](https://github.com/idoco
 - Feel free to fork this project and suggest new features as pull requests.
 
 ## [Demo](http://hammerio.github.io/map-chat)
-This demo is hosted on GitHub pages and HammerDB as backend.
+This demo is hosted on GitHub pages and uses HammerDB for communication.
