@@ -7,9 +7,9 @@ var db = createHammer()
 var appId = "b4aUPLE7"
 
 function initialiseEventBus(){
-    mySessionId = uid()
-    setupWatchPosition()
+    mySessionId = uid()    
     subscribe(topic)
+    setupWatchPosition()
 }
 
 function sendMessage(topic, input) {
@@ -24,11 +24,17 @@ function publish(address, message) {
     db.insert(appId + topic, JSON.stringify(json))
 }
 
+var new_subscription = true
 function subscribe(address) {
     db.live(function(db){
       db.query(appId + topic,1).then(function(resp){      
         if(resp.result)
           displayMessageOnMap(JSON.parse(resp.result.value))
+          
+        if(new_subscription) {            
+          publish(topic,"")
+          new_subscription = false
+        }
       })
     })
 }
