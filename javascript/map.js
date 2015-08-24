@@ -117,6 +117,8 @@ function displayMessageOnMap(msg){
     msg.text = String(msg.text).replace(/[&<>"'\/卐卍]/g, function (s) {
         return entityMap[s];
     });
+    
+    msg.text = msg.text.replace(/_br_/g,"<br/>")
 
 //    msg.text = msg.text ? embedTweet(msg.text) : "";
 

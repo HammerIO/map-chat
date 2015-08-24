@@ -33,9 +33,30 @@ function subscribe(address) {
     var key_filter = appId+"."+address+"."
 
     // Initial query to find 10th last message
-    db.query(key_filter,true,10).then(function(resp){
-        if(resp.results.length)
-          last_uid_seen = resp.results[resp.results.length-1].key.substring(key_filter.length)
+    db.query(key_filter,true,50).then(function(resp){
+        if(resp.result)
+          last_uid_seen = resp.result.key.substring(key_filter.length)
+        
+        var sessions = {}
+        
+        for(var i = resp.results.length-1; i >= 0; i--) {
+          var res = resp.results[i]
+          last_uid_seen = res.key.substring(key_filter.length)
+          var msg = JSON.parse(res.value)
+          var first = sessions[msg.sessionId]
+          if(!first) {
+            sessions[msg.sessionId] = msg
+          } else if(msg.text.trim() != "") {
+            if(first.text.trim() != "")
+              first.text += "_br_"+msg.text
+            else
+              first.text = msg.text
+          }
+        }
+        
+        for(var sid in sessions) {
+          displayMessageOnMap(sessions[sid])
+        }
           
         // Live query that tracks new messages
         db.live(function(db){
