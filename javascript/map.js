@@ -2,6 +2,7 @@
 var mySessionId;
 var map;
 var userLocation;
+var userLocationName;
 var fuzzyUserLocation;
 var markersMap = {};
 var markerImage;
@@ -76,6 +77,10 @@ function setupWatchPosition() {
 
 function onFirstPosition(position){
     setUserLocation(position.coords.latitude, position.coords.longitude);
+    getLocation(position.coords.latitude, position.coords.longitude).then(function(res){
+        userLocationName = res
+        publish(topic,"")
+    })
     initialiseEventBus();
     map.panTo(userLocation);
 }
@@ -95,16 +100,63 @@ function onPositionError(err) {
 
 function setUserLocation(lat, lng){
     userLocation = new google.maps.LatLng(lat, lng);
-    fuzzyUserLocation = new google.maps.LatLng(Math.round(lat * 100) / 100, Math.round(lng * 100) / 100);
+    fuzzyUserLocation = new google.maps.LatLng(Math.round(lat * 100) / 100, Math.round(lng * 100) / 100);    
 }
 
 function createMessage(text){
     return {
         lat: shareAccurateLocation ? userLocation.lat() : fuzzyUserLocation.lat(),
         lng: shareAccurateLocation ? userLocation.lng() : fuzzyUserLocation.lng(),
+        loc: userLocationName,
         sessionId: mySessionId,
         text: text
     };
+}
+
+function getLocation(lat,lng) {
+    return new Promise(function(resolve,reject){
+        var latlng = new google.maps.LatLng(lat, lng);
+        var geocoder = new google.maps.Geocoder()
+        
+        function checkType(comp,typ) {
+            for(var i = 0; i < comp.types.length; i++) {
+                if(comp.types[i] == typ)
+                    return true
+            }
+            return false
+        }    
+        
+        geocoder.geocode({latLng:latlng},function(res,status){
+            if(status == google.maps.GeocoderStatus.OK) {
+                var comps = res[0]["address_components"]
+                var town = undefined
+                var country = undefined
+                
+                //console.log(JSON.stringify(res,null,2))
+                
+                for(var i = 0; i < comps.length; i++) {
+                    var comp = comps[i]
+                    if(!town && checkType(comp,"administrative_area_level_2")) {
+                        town = comp.short_name
+                    }
+                    /*if(!town && checkType(comp,"administrative_area_level_1")) {
+                        town = comp.long_name
+                    }*/
+                    else if(checkType(comp,"locality")) {
+                        town = comp.long_name
+                    }
+                    if(checkType(comp,"country")) {
+                        country = comp.short_name
+                    }        
+                }
+                
+                resolve(town + " (" + country + ")")
+              
+            } else {
+                reject("error1")
+            }
+        })
+    })
 }
 
 function displayMessageOnMap(msg){
