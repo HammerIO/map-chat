@@ -4,12 +4,13 @@ var urlHashTopic = location.hash ? location.hash.substring(1).toLowerCase() : nu
 var topic = urlHashTopic ? urlHashTopic : "main";
 
 var db = createHammer()
-var appId = "b4aUPLE7"
+var appId = "ic02umfO"
 
 function initialiseEventBus(){
     mySessionId = uid()    
     subscribe(topic)
     setupWatchPosition()
+    publish(topic,"")
 }
 
 function sendMessage(topic, input) {
@@ -20,23 +21,33 @@ function sendMessage(topic, input) {
 }
 
 function publish(address, message) {
-    var json = createMessage(message);        
-    db.insert(appId + topic, JSON.stringify(json))
+    var json = createMessage(message);
+    db.getUID().then(function(resp){
+      db.insert(appId+"."+address+"."+resp.result, JSON.stringify(json))
+    })
+    
 }
 
-var new_subscription = true
+var last_uid_seen = ""
 function subscribe(address) {
-    db.live(function(db){
-      db.query(appId + topic,1).then(function(resp){      
-        if(resp.result)
-          displayMessageOnMap(JSON.parse(resp.result.value))
+    var key_filter = appId+"."+address+"."
+
+    // Initial query to find 10th last message
+    db.query(key_filter,true,10).then(function(resp){
+        if(resp.results.length)
+          last_uid_seen = resp.results[resp.results.length-1].key.substring(key_filter.length)
           
-        if(new_subscription) {            
-          publish(topic,"")
-          new_subscription = false
-        }
-      })
-    })
+        // Live query that tracks new messages
+        db.live(function(db){
+            db.query(key_filter,last_uid_seen,20,1).then(function(resp){      
+                for(var i = 0; i < resp.results.length; i++) {
+                  var res = resp.results[i]
+                  last_uid_seen = res.key.substring(key_filter.length)
+                  displayMessageOnMap(JSON.parse(res.value))
+                }
+            })
+        })    
+    })    
 }
 
 $( document ).ready(function() {
