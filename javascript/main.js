@@ -39,16 +39,16 @@ function subscribe(address) {
         
         var sessions = {}
         
-        for(var i = resp.results.length-1; i >= 0; i--) {
-          var res = resp.results[i]
-          last_uid_seen = res.key.substring(key_filter.length)
+        for(var i = 0; i < resp.results.length; i++) {
+          var res = resp.results[i]          
           var msg = JSON.parse(res.value)
           var first = sessions[msg.sessionId]
+          
           if(!first) {
             sessions[msg.sessionId] = msg
           } else if(msg.text.trim() != "") {
             if(first.text.trim() != "")
-              first.text += "_br_"+msg.text
+              first.text = msg.text + "_br_" + first.text
             else
               first.text = msg.text
           }
@@ -60,7 +60,7 @@ function subscribe(address) {
           
         // Live query that tracks new messages
         db.live(function(db){
-            db.query(key_filter,last_uid_seen,20,1).then(function(resp){      
+            db.query(key_filter,last_uid_seen,20,1).then(function(resp){                
                 for(var i = 0; i < resp.results.length; i++) {
                   var res = resp.results[i]
                   last_uid_seen = res.key.substring(key_filter.length)
