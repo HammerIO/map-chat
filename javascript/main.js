@@ -4,7 +4,7 @@ var urlHashTopic = location.hash ? location.hash.substring(1).toLowerCase() : nu
 var topic = urlHashTopic ? urlHashTopic : "main";
 
 var db = createHammer()
-var appId = "ic02umfO"
+var appId = "IDFfBhdw"
 
 var log_el = document.getElementById("log")
 var log_wrapper = document.getElementById("log-wrapper")
@@ -82,7 +82,8 @@ function subscribe(address) {
           displayMessageOnMap(sessions[sid])
         }        
         
-        log("Last message - " + new Date(uidToNum(last_uid_seen)))
+        console.log("last seen: " + last_uid_seen)
+        log("Last message - " + new Date(uidToTime(last_uid_seen)))
           
         // Live query that tracks new messages
         db.live(function(db){
