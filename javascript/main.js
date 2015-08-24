@@ -6,11 +6,17 @@ var topic = urlHashTopic ? urlHashTopic : "main";
 var db = createHammer()
 var appId = "ic02umfO"
 
+var log_el = document.getElementById("log")
+var log_wrapper = document.getElementById("log-wrapper")
+
+var last_uid_seen = ""
+var last_update = new Date().getTime()
+var last_update_old = false
+
 function initialiseEventBus(){
     mySessionId = uid()    
     subscribe(topic)
-    setupWatchPosition()
-    publish(topic,"")
+    setupWatchPosition()    
 }
 
 function sendMessage(topic, input) {
@@ -28,35 +34,55 @@ function publish(address, message) {
     
 }
 
-var last_uid_seen = ""
+function log(msg) {
+    if(msg.lat) {
+      log_el.innerHTML += "<i>" + (msg.loc || "Unkown location") + "</i>: " + (msg.text || "joined") + "<br/>"
+    } else {
+      log_el.innerHTML += "<i>" + msg + "</i><br/>"
+    }
+    
+    log_wrapper.scrollTop = log_wrapper.scrollHeight
+    last_update = new Date().getTime()
+    last_update_old = false
+}
+
+function checkLog() {
+    if(last_update_old)
+      return
+      
+    var now = new Date().getTime()
+    if((now - last_update) > 60000) {
+        log("Idle (1 min) - " + new Date())
+        log_wrapper.scrollTop = log_wrapper.scrollHeight
+        last_update_old = true
+    }
+}
+
+setInterval(checkLog,5000)
+
 function subscribe(address) {
     var key_filter = appId+"."+address+"."
 
     // Initial query to find 10th last message
-    db.query(key_filter,true,50).then(function(resp){
+    db.query(key_filter,true,20).then(function(resp){
         if(resp.result)
           last_uid_seen = resp.result.key.substring(key_filter.length)
         
         var sessions = {}
         
-        for(var i = 0; i < resp.results.length; i++) {
+        for(var i = resp.results.length-1; i >= 0; i--) {
           var res = resp.results[i]          
           var msg = JSON.parse(res.value)
-          var first = sessions[msg.sessionId]
           
-          if(!first) {
-            sessions[msg.sessionId] = msg
-          } else if(msg.text.trim() != "") {
-            if(first.text.trim() != "")
-              first.text = msg.text + "_br_" + first.text
-            else
-              first.text = msg.text
-          }
+          sessions[msg.sessionId] = msg
+          log(msg)
         }
         
         for(var sid in sessions) {
           displayMessageOnMap(sessions[sid])
-        }
+        }        
+        
+        log("Last message - " + new Date(uidToNum(last_uid_seen)))
           
         // Live query that tracks new messages
         db.live(function(db){
@@ -64,7 +90,9 @@ function subscribe(address) {
                 for(var i = 0; i < resp.results.length; i++) {
                   var res = resp.results[i]
                   last_uid_seen = res.key.substring(key_filter.length)
-                  displayMessageOnMap(JSON.parse(res.value))
+                  var msg = JSON.parse(res.value)
+                  displayMessageOnMap(msg)
+                  log(msg)
                 }
             })
         })    
