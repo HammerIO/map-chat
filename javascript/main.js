@@ -4,7 +4,7 @@ var urlHashTopic = location.hash ? location.hash.substring(1).toLowerCase() : nu
 var topic = urlHashTopic ? urlHashTopic : "main";
 
 var db = createHammer()
-var appId = "IDFfBhdw"
+var appId = "ic02umfO"
 
 var log_el = document.getElementById("log")
 var log_wrapper = document.getElementById("log-wrapper")
