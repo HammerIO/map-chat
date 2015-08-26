@@ -278,7 +278,7 @@ function _channelOpen(htags) {
                 same_ch = false
             }
 
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + linkify(msg.text || "joined"))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
