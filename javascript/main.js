@@ -261,10 +261,9 @@ function _channelOpen(htags) {
         })
     }
     
-    ob.log = function (msg) {
+    ob.isPure = function(msg) {
+        var same_ch = true
         if(msg.lat) {
-            var same_ch = true
-            
             if(msg.tags.length == ob.tags.length) {
                 for(var i = 0; i < msg.tags.length; i++) {
                     var mtag = msg.tags[i]
@@ -277,7 +276,14 @@ function _channelOpen(htags) {
             } else {
                 same_ch = false
             }
-
+        }
+        
+        return same_ch
+    }
+    
+    ob.log = function (msg) {
+        if(msg.lat) {
+            var same_ch = ob.isPure(msg)
             ob.logs.push("<i style='font-size:80%;'>" + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
@@ -336,8 +342,10 @@ function _channelOpen(htags) {
                         ob.last_uid_seen = res.key.substring(key_filter.length)
                         var msg = JSON.parse(res.value)
                         ob.log(msg)
-                        displayMessageOnMap(msg)                      
-                        ob.last_update = new Date().getTime()
+                        displayMessageOnMap(msg)
+                        if(ob.isPure(msg)) {
+                            ob.last_update = new Date().getTime()
+                        }
                     }
                 })
             })    
