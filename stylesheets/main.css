@@ -60,7 +60,7 @@ html, body, #map-canvas {
     padding: 5px;
     padding-bottom: 20px;
     font-size:90%;
-    overflow-y: hidden;
+    overflow: hidden;
     height:100%;
 }
 
