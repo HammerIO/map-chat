@@ -12,6 +12,12 @@ var content_wrapper = document.getElementById("content-wrapper")
 var content_sel_new = false
 var content_sel_help = false
 
+var nick = localStorage["mapchat_nick"]
+if(!nick) {
+  nick = (Math.floor(Math.random()*100)).toString()
+  localStorage["mapchat_nick"] = nick
+}
+
 var channels = []
 var active_channel_index = 0
 
@@ -238,6 +244,7 @@ function _channelOpen(htags) {
         ob.last_log_old_set = false
         var json = createMessage(input);
         json.tags = ob.tags
+        json.nick = nick
         
         db.getUID().then(function(resp){
             var args = []
@@ -284,7 +291,7 @@ function _channelOpen(htags) {
     ob.log = function (msg) {
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + " @") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
@@ -387,7 +394,11 @@ function chatBarMessage(input) {
       }
       else if(msg.startsWith("/clear")) {
           clearMessageFromMap()
-      }      
+      }
+      else if(msg.startsWith("/nick")) {
+          nick = msg.substring("/nick".length).trim()
+          localStorage["mapchat_nick"] = nick
+      }
   
       else {
           getActiveChannel().publish(msg);
