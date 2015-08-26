@@ -13,9 +13,15 @@ var content_sel_new = false
 var content_sel_help = false
 
 var nick = localStorage["mapchat_nick"]
+var nick_color = localStorage["mapchat_nick_color"]
 if(!nick) {
   nick = (Math.floor(Math.random()*100)).toString()
   localStorage["mapchat_nick"] = nick
+}
+
+if(!nick_color) {
+  nick_color = "purple"
+  localStorage["mapchat_nick_color"] = nick_color
 }
 
 var channels = []
@@ -169,7 +175,6 @@ function updateLog() {
         ch.logs = newlog
     }
     
-    //content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:5px; width:75%; text-align:center; font-size:90%; padding:2px; cursor: pointer; background:rgba(244,67,54,0.8);' onclick='channelCloseClick()'>Close</div>"
     content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:75%; text-align:center; font-size:90%; padding:2px; cursor: pointer; background:rgba(33,150,243,0.9); color:white;' onclick='channelCloseClick()'>Close</div>"
     content_wrapper.scrollTop = content_wrapper.scrollHeight
 }
@@ -248,6 +253,7 @@ function _channelOpen(htags) {
         var json = createMessage(input);
         json.tags = ob.tags
         json.nick = nick
+        json.nick_color = nick_color
         
         db.getUID().then(function(resp){
             var args = []
@@ -294,7 +300,7 @@ function _channelOpen(htags) {
     ob.log = function (msg) {
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
@@ -401,6 +407,10 @@ function chatBarMessage(input) {
       else if(msg.startsWith("/nick")) {
           nick = msg.substring("/nick".length).trim()
           localStorage["mapchat_nick"] = nick
+      }
+      else if(msg.startsWith("/color")) {
+          nick_color = msg.substring("/color".length).trim()
+          localStorage["mapchat_nick_color"] = nick_color
       }
   
       else {
