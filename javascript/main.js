@@ -90,9 +90,11 @@ function topicClick(id) {
       content_el.innerHTML = "<div><b>MapChat commands</b></div>"+
           "<p>You can write commands directly into the chat-bar. Following commands are supported:</p>"+
           "<ul>"+
-          "<li><b>/join <tag1> <tag2> </b>- Joins a channel with specified tags</li>"+      
+          "<li><b>/nick &lt;nick&gt; </b>- Sets nickname to display</li>"+
+          "<li><b>/join &lt;tag&gt; </b>- Joins a channel with specified tags</li>"+                
           "<li><b>/close </b>- Closes current channel</li>"+
           "<li><b>/clear </b>- Clears all map annotations</li>"+
+          
           "</ul>"+
           "<div><b>FAQ</b></div>"+
           "<p><i>Q: What is the \"Location - &lt;something&gt\" I see in my logs?</i> &lt;something&gt indicates that the message is written from a cross-channel. Type /join &lt;something&gt; in the chat bar to focus in on the conversation</p>"
