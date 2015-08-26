@@ -12,6 +12,12 @@ var content_wrapper = document.getElementById("content-wrapper")
 var content_sel_new = false
 var content_sel_help = false
 
+var nick = localStorage["mapchat_nick"]
+if(!nick) {
+  nick = (Math.floor(Math.random()*100)).toString()
+  localStorage["mapchat_nick"] = nick
+}
+
 var channels = []
 var active_channel_index = 0
 
@@ -84,9 +90,11 @@ function topicClick(id) {
       content_el.innerHTML = "<div><b>MapChat commands</b></div>"+
           "<p>You can write commands directly into the chat-bar. Following commands are supported:</p>"+
           "<ul>"+
-          "<li><b>/join <tag1> <tag2> </b>- Joins a channel with specified tags</li>"+      
+          "<li><b>/nick &lt;nick&gt; </b>- Sets nickname to display</li>"+
+          "<li><b>/join &lt;tag&gt; </b>- Joins a channel with specified tags</li>"+                
           "<li><b>/close </b>- Closes current channel</li>"+
           "<li><b>/clear </b>- Clears all map annotations</li>"+
+          
           "</ul>"+
           "<div><b>FAQ</b></div>"+
           "<p><i>Q: What is the \"Location - &lt;something&gt\" I see in my logs?</i> &lt;something&gt indicates that the message is written from a cross-channel. Type /join &lt;something&gt; in the chat bar to focus in on the conversation</p>"
@@ -238,6 +246,7 @@ function _channelOpen(htags) {
         ob.last_log_old_set = false
         var json = createMessage(input);
         json.tags = ob.tags
+        json.nick = nick
         
         db.getUID().then(function(resp){
             var args = []
@@ -284,7 +293,7 @@ function _channelOpen(htags) {
     ob.log = function (msg) {
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + " @") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:purple'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
@@ -387,7 +396,11 @@ function chatBarMessage(input) {
       }
       else if(msg.startsWith("/clear")) {
           clearMessageFromMap()
-      }      
+      }
+      else if(msg.startsWith("/nick")) {
+          nick = msg.substring("/nick".length).trim()
+          localStorage["mapchat_nick"] = nick
+      }
   
       else {
           getActiveChannel().publish(msg);
