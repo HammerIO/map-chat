@@ -79,7 +79,7 @@ function onFirstPosition(position){
     setUserLocation(position.coords.latitude, position.coords.longitude);
     getLocation(position.coords.latitude, position.coords.longitude).then(function(res){
         userLocationName = res
-        publish(topic,"")
+        //getActiveChannel().publish("")
     })
     initialiseEventBus();
     map.panTo(userLocation);
@@ -94,8 +94,8 @@ function onPositionUpdate(position) {
 }
 
 function onPositionError(err) {
-    Materialize.toast('User location not available :(', 7000);
-    console.error('Error(' + err.code + '): ' + err.message);
+    //Materialize.toast('User location not available :(', 7000);
+    //console.error('Error(' + err.code + '): ' + err.message);
 }
 
 function setUserLocation(lat, lng){
@@ -159,6 +159,7 @@ function getLocation(lat,lng) {
     })
 }
 
+
 function displayMessageOnMap(msg){
     var newPosition = new google.maps.LatLng(msg.lat,msg.lng);
     var msgSessionId = msg.sessionId;
@@ -166,11 +167,12 @@ function displayMessageOnMap(msg){
     // xss prevention hack
     msg.text = html_sanitize(msg.text);
 
-    msg.text = String(msg.text).replace(/[&<>"'\/卐卍]/g, function (s) {
+    msg.text = String(msg.text).replace(/[<>"'\/卐卍]/g, function (s) {
         return entityMap[s];
     });
     
     msg.text = msg.text.replace(/_br_/g,"<br/>")
+    msg.text = linkify(msg.text)
 
 //    msg.text = msg.text ? embedTweet(msg.text) : "";
 

@@ -43,18 +43,74 @@ html, body, #map-canvas {
     box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19) !important;
 }
 
-.log-wrapper {
-    font-size:90%;
+#topic_and_content {
     position: fixed;
     top:70px;
     right:10px;
-    width:25%;
-    height:60%;
+    width:30%;
+    height:70%;
     background:rgba(255,255,255,0.8);
-    padding:5px;
+    //padding:5px;
     border-radius:5px;
     box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+
+#content-wrapper {
+    margin-top:5px;
+    padding: 5px;
+    padding-bottom: 20px;
+    font-size:90%;
     overflow-y: hidden;
+    height:100%;
+}
+
+
+#topic-wrapper {
+    float:left;
+    //padding:5px;
+    overflow: hidden;
+    //background:rgba(155,155,255,0.8);
+    //background:rgba(33,150,243,1.0);
+    color:white;
+    width:20%;
+    border-radius:5px 0px 0px 0px;    
+    height:100%;
+    margin-right:5px;
+}
+
+.topic-button {
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  padding:3px 5px 3px 5px;
+  background:rgba(33,150,243,1.0);
+  border-bottom: 1px solid white;
+}
+
+.topic-button:first-child {
+  padding:5px 5px 5px 5px;
+}
+
+/*
+.topic-button:nth-child(2) {
+  border-bottom: 10px solid white;
+}
+*/
+
+.topic-button:hover {
+  background:rgba(33,150,243,0.7);
+}
+
+.selected {
+  background:rgba(33,150,243,0.7);
+}
+
+.alarm {
+  background:rgb(244,67,54) !important;
 }
 
 

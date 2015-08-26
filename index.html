@@ -26,7 +26,7 @@
 <div class="navbar-fixed">
     <nav>
         <div class="nav-wrapper blue">
-            <a class="brand-logo center" href="https://github.com/HammerIO/map-chat">MapChat</a>
+            <a class="brand-logo center" href="https://github.com/HammerIO/map-chat">MapChat <span style="font-size:30%">A HammerIO fork</span></a>
             <a id="side-nav-button" href="#" data-activates="side-nav"><i class="mdi-navigation-menu"></i></a>
             <ul class="side-nav" id="side-nav">
                 <li>
@@ -52,11 +52,13 @@
     </nav>
 </div>
 
+<!--
 <a href="https://github.com/HammerIO/map-chat" class="hide-on-med-and-down">
     <img style="position: absolute; right: 0; border: 0; z-index: 1000;"
          src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
          alt="Fork me on GitHub">
 </a>
+-->
 
 <div class="fixed-action-btn zoom-buttons">
     <div>
@@ -75,8 +77,16 @@
 
 <div id="map-canvas"></div>
 
-<div id="log-wrapper" class="log-wrapper">
-    <div id="log" class="log"></div>
+<div id="topic_and_content">
+    <div id="topic-wrapper">  
+        <div id="topic_button_adm" class="topic-button" onclick="topicClick('adm')"> new</div>
+        <div id="topic_button_help" class="topic-button" onclick="topicClick('help')"> help</div>
+        <div id="topic_button_0" class="topic-button" onclick="topicClick('0')">#start</div>
+    </div>
+
+    <div id="content-wrapper">
+        <div id="content"></div>
+    </div>
 </div>
 
 <div class="center input-wrapper">
