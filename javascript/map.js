@@ -14,6 +14,8 @@ var isLowResolution = window.screen.width < 768;
 var defaultZoom = isLowResolution ? 2 : 3;
 var minZoom = isLowResolution ? 1 : 3;
 
+var timeLastMessage = new Date().getTime()
+
 var locationOptions = {
     enableHighAccuracy: true,
     timeout: 10000,
@@ -159,22 +161,62 @@ function getLocation(lat,lng) {
     })
 }
 
+// Copied from http://stackoverflow.com/questions/37684/how-to-replace-plain-urls-with-links
+function linkify(inputText) {
+    var intext = inputText.toString()
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+    
+    //Channels starting with #
+    replacePattern1 = /(#(\S)+)/gim;
+    replacedText = intext.replace(replacePattern1, '<a href="javascript:;" onclick="channelOpen(\'$1\');">$1</a>');
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
+}
+
+
+// xss prevention hack
+function sanitizeMsg(msg) {    
+    function html(text) {
+        text = html_sanitize(text);
+        
+        text = text.replace(/[<>"'卐卍]/g, function (s) {
+            return entityMap[s];
+        });
+        
+        text = text.replace(/&(\S{1,5};)/g,"&amp;$1")
+        
+        text = text.replace(/_br_/g,"<br/>")
+        
+        text = linkify(text)
+        return text
+    }
+    
+    if(msg.text)
+        msg.text = html(msg.text)
+    if(msg.loc)
+        msg.loc = msg.loc.replace(/[<>"'\\\/卐卍]/g,"")
+    if(msg.nick)
+        msg.nick = msg.nick.replace(/[<>"'\\\/卐卍]/g,"")
+    if(msg.nick_color)
+        msg.nick_color = msg.nick_color.replace(/[<>"'\\\/;:]/g,"")
+}
+
 
 function displayMessageOnMap(msg){
     var newPosition = new google.maps.LatLng(msg.lat,msg.lng);
     var msgSessionId = msg.sessionId;
-
-    // xss prevention hack
-    msg.text = html_sanitize(msg.text);
-
-    msg.text = String(msg.text).replace(/[<>"'\/卐卍]/g, function (s) {
-        return entityMap[s];
-    });
-    
-    msg.text = msg.text.replace(/_br_/g,"<br/>")
-    msg.text = linkify(msg.text)
-
-//    msg.text = msg.text ? embedTweet(msg.text) : "";
 
     if(markersMap[msgSessionId]){ // update existing marker
         var existingMarker = markersMap[msgSessionId].marker;
@@ -260,7 +302,11 @@ function changeZoom(factor){
 }
 
 function runAdvancedOptions(msg){
-    if (msg.sessionId == mySessionId){
+    var time = new Date().getTime()
+    var diff = time - timeLastMessage
+    timeLastMessage = time
+
+    if (msg.sessionId == mySessionId || diff < 60000){
         return;
     }
 
