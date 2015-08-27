@@ -183,7 +183,7 @@ setInterval(updateLog,50)
 
 function isAlarm(chi) {
     var ch = channels[chi]
-    if((active_channel_index != chi || ch.last_log_old_set || content_sel_new || content_sel_help) && ch.last_update) {
+    if((active_channel_index != chi || content_sel_new || content_sel_help || ch.last_log_old_set) && ch.last_update) {
         return true
     } else {
         ch.last_update = 0
@@ -197,30 +197,6 @@ function checkAlerts() {
 setInterval(checkAlerts,1000)
 
 
-// Copied from http://stackoverflow.com/questions/37684/how-to-replace-plain-urls-with-links
-function linkify(inputText) {
-    var intext = inputText.toString()
-    var replacedText, replacePattern1, replacePattern2, replacePattern3;
-    
-    //Channels starting with #
-    replacePattern1 = /(#(\S)+)/gim;
-    replacedText = intext.replace(replacePattern1, '<a href="javascript:;" onclick="channelOpen(\'$1\');">$1</a>');
-
-    //URLs starting with http://, https://, or ftp://
-    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-    replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
-
-    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
-    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
-    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
-
-    //Change email addresses to mailto:: links.
-    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
-    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
-
-    return replacedText;
-}
-
 function _channelOpen(htags) {
     if(!htags)
       htags = ["world"]
@@ -230,6 +206,7 @@ function _channelOpen(htags) {
     var ob = {
       last_uid_seen: "",
       last_log: new Date().getTime(),
+      last_log_self: false,
       last_log_old: false,
       last_log_old_set: false,
       last_update: new Date().getTime(),
@@ -300,7 +277,7 @@ function _channelOpen(htags) {
     ob.log = function (msg) {
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+linkify(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+linkify(msg.text || "joined")+"</span>")))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
@@ -338,6 +315,7 @@ function _channelOpen(htags) {
             for(var i = resp.results.length-1; i >= 0; i--) {
                 var res = resp.results[i]          
                 var msg = JSON.parse(res.value)
+                sanitizeMsg(msg)
                 
                 sessions[msg.sessionId] = msg
                 ob.log(msg)
@@ -357,10 +335,18 @@ function _channelOpen(htags) {
                         var res = resp.results[i]
                         ob.last_uid_seen = res.key.substring(key_filter.length)
                         var msg = JSON.parse(res.value)
-                        ob.log(msg)
-                        displayMessageOnMap(msg)
-                        if(ob.isPure(msg)) {
-                            ob.last_update = new Date().getTime()
+                        sanitizeMsg(msg)
+                        
+                        if(!(markersMap[msg.sessionId] || {disabled:false}).disabled) {       
+                            if(ob.last_log_old_set && msg.sessionId == mySessionId) {
+                                ob.last_log_old_set = false
+                            }
+                          
+                            ob.log(msg)
+                            displayMessageOnMap(msg)
+                            if(ob.isPure(msg)) {
+                                ob.last_update = new Date().getTime()
+                            }
                         }
                     }
                 })
@@ -399,6 +385,9 @@ function chatBarMessage(input) {
           channelOpen(msg.substring("/join".length))
       }
       else if(msg.startsWith("/close")) {
+          channelCloseClick()
+      }
+      else if(msg.startsWith("/leave")) {
           channelCloseClick()
       }
       else if(msg.startsWith("/clear")) {
@@ -448,6 +437,9 @@ $( document ).ready(function() {
 
     $("#notification_lever").change(function() {
         advanced = !advanced;
+        if(advanced && Notification.permission !== "granted") {
+          Notification.requestPermission();
+        }
         Materialize.toast(advanced ? 'Notifications On' : 'Notifications Off', 3000);
     });
 
