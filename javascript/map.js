@@ -191,7 +191,7 @@ function sanitizeMsg(msg) {
     function html(text) {
         text = html_sanitize(text);
         
-        text = text.replace(/[<>"'卐卍]/g, function (s) {
+        text = text.replace(/[<>卐卍]/g, function (s) {
             return entityMap[s];
         });
         
