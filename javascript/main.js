@@ -479,6 +479,38 @@ $( document ).ready(function() {
     if(!Modernizr.websockets || !Modernizr.geolocation){
         Materialize.toast('Browser not supported :(', 10000);
     }
+    
+    var prevX = 0
+    var startY =0 
+    var isDragging = false
+    var container = document.getElementById("topic_and_content")
+    
+    $("#topic_and_content_resize").mousedown(function(e){
+      isDragging = true
+      prevX = e.pageX
+      prevY = e.pageY
+    }).mousemove(function(e){
+      if(isDragging) {
+        var dx = -((e.pageX - prevX) / window.innerWidth)
+        var dy = (e.pageY - prevY) / window.innerHeight
+        prevX = e.pageX
+        prevY = e.pageY
+        
+        // Uses %, want to keep ratio the same when moving to different screens
+        if(!container.style.width)
+          container.style.width = "30%"
+        if(!container.style.height)
+          container.style.height = "70%"
+        
+        var curx = parseFloat(container.style.width.replace(/%/,""))
+        var cury = parseFloat(container.style.height.replace(/%/,""))
+        
+        container.style.width = (curx + (dx*100)) + "%"
+        container.style.height = (cury + (dy*100)) + "%"
+      }
+    }).mouseup(function(){
+      isDragging = false
+    })
 
     $("#side-nav-button").sideNav();
     
