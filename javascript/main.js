@@ -111,7 +111,7 @@ function topicClick(id) {
           "<p>Enter channel tags below to start interacting with people using the same tags.</p>"+
           "<p>A channel with multiple tags, like #world and #english, will ONLY listen for messages posted with tags #world and #english. Any message posted from this channel will be visible to people listening to any permutation of the tags, i.e #world, #english, or #world&english.</p>"+
           "<p>Channel examples:<br/>"+
-          clink('#world') + clink('#world&english') + clink('#world&party') + clink('#us') + clink('#europe') + clink('#asia') + clink('#programming') + clink('#programming&scala',true) + "</p>"+
+          clink('#world') + clink('#world&english') + clink('#world&party') + clink('#europe') + clink('#us') + clink('#asia') + clink('#programming') + clink('#programming&scala')  + clink('#feedback',true) + "</p>"+
           "<div><input id='channel_open_input' onkeyup='channelOpenChange(event);' style='width:100%;margin:0px;padding:0px;' type='text' placeholder='tag1 tag2 tag3' />"+
           "<button onclick='channelOpenClick();' style='float:right;margin-top:5px;'>Open (Enter)</button></div>"
           
