@@ -81,7 +81,6 @@ function onFirstPosition(position){
     setUserLocation(position.coords.latitude, position.coords.longitude);
     getLocation(position.coords.latitude, position.coords.longitude).then(function(res){
         userLocationName = res
-        //getActiveChannel().publish("")
     })
     initialiseEventBus();
     map.panTo(userLocation);
@@ -99,10 +98,21 @@ function onPositionError(err) {
     Materialize.toast('User location not available :(', 7000);
     
     if(!mySessionId) {
-      setUserLocation(64.923542, -44.472656);
-      userLocationName = "unknown.na"
-      initialiseEventBus();
-      map.panTo(userLocation);
+      $.getJSON("http://ipinfo.io", function(doc){
+        var latlong = doc.loc.split(",")
+        setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
+        getLocation(parseFloat(latlong[0]), parseFloat(latlong[1])).then(function(res){
+          userLocationName = res
+        })
+        initialiseEventBus();
+        map.panTo(userLocation);
+        
+      }, function(err) {
+        setUserLocation(Math.random()*50, Math.random()*60);
+        userLocationName = "unknown.na"
+        initialiseEventBus();
+        map.panTo(userLocation);
+      })
     }
 }
 
