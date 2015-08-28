@@ -309,52 +309,63 @@ function _channelOpen(htags) {
         ob.checkLog()
     },5000)
 
+    
     ob.start = function() {
         var key_filter = appId+","+ob.address() + ","
-
-        db.live(function(db){            
-            db.query(key_filter,"",ob.last_uid_seen,true,20).then(function(resp){                
-                var sessions = {}                
-                var found_last_end = false
-                
-                for(var i = resp.results.length-1; i >= 0; i--) {
-                    var res = resp.results[i]          
-                    
-                    if(res.key.substring(key_filter.length) <= ob.last_uid_seen) {
-                        found_last_end = true
-                        continue;
-                    }
-                    
-                    var msg = JSON.parse(res.value)
-                    sanitizeMsg(msg)
-                    
-                    if(!(markersMap[msg.sessionId] || {disabled:false}).disabled) {
-                        sessions[msg.sessionId] = msg
-                        ob.log(msg)
-                        
-                        if(ob.last_log_old_set && msg.sessionId == mySessionId) {
-                            ob.last_log_old_set = false
-                        }                
-                        
-                        if(ob.isPure(msg)) {
-                            ob.last_update = new Date().getTime()
-                        }
-                    }
-                }
-                
-                if(ob.last_uid_seen != "" && !found_last_end) {
-                    ob.log("Missed some updates..")
-                }
-                
-                for(var sid in sessions) {
-                    displayMessageOnMap(sessions[sid])
-                }
-                
-                if(resp.result) {
-                    ob.last_uid_seen = resp.result.key.substring(key_filter.length)
-                }
-            })
         
+        // Chat log handler
+        function handleResp(resp) {
+            var sessions = {}                
+            var found_last_end = false
+            
+            for(var i = resp.results.length-1; i >= 0; i--) {
+                var res = resp.results[i]          
+                
+                if(res.key.substring(key_filter.length) <= ob.last_uid_seen) {
+                    found_last_end = true
+                    continue;
+                }
+                
+                var msg = JSON.parse(res.value)
+                sanitizeMsg(msg)
+                
+                if(!(markersMap[msg.sessionId] || {disabled:false}).disabled) {
+                    sessions[msg.sessionId] = msg
+                    ob.log(msg)
+                    
+                    if(ob.last_log_old_set && msg.sessionId == mySessionId) {
+                        ob.last_log_old_set = false
+                    }                
+                    
+                    if(ob.isPure(msg)) {
+                        ob.last_update = new Date().getTime()
+                    }
+                }
+            }
+            
+            if(ob.last_uid_seen != "" && !found_last_end) {
+                ob.log("Missed some updates..")
+            }
+            
+            for(var sid in sessions) {
+                displayMessageOnMap(sessions[sid])
+            }
+            
+            if(resp.result) {
+                ob.last_uid_seen = resp.result.key.substring(key_filter.length)
+            }
+        }
+        
+        // Snapshot query: Fetch some history 
+        db.query(key_filter,"",true,20).then(function(resp){                
+            handleResp(resp)
+            
+            // Live query: Track head
+            db.live(function(db){            
+                db.query(key_filter,"",true,3).then(function(resp){                
+                    handleResp(resp)
+                })        
+            })
         })
         
         return this
