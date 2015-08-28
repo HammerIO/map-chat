@@ -30,10 +30,25 @@ var active_channel_index = 0
 var log_last_selected = 0
 var log_last_length = 0
 
-var _ch = _channelOpen(["world"])
-channels.push(_ch)
-
+initChannels()
 updateButtonState()
+
+function initChannels() {
+    var hindex = window.location.href.indexOf('#') 
+    
+    if(hindex == -1) {
+        channelOpen("world",true)
+        return
+    }
+    
+    console.log(window.location.href.substring(hindex))
+    
+    var chx = window.location.href.substring(hindex).split(',')
+    for(var i = 0; i < chx.length; i++) {
+        console.log("open: " + chx[i])
+        channelOpen(chx[i],true)
+    }
+}
 
 function getActiveChannel() {
     if(active_channel_index < 0)
@@ -57,12 +72,23 @@ function updateButtonState() {
         selected = "help"
     }
     
+    var url_builder = []
+    
     var html = '<div id="topic_button_adm" class="topic-button '+(selected == 'adm' ? 'selected':'')+'" onclick="topicClick(\'adm\')"> new</div>'
     html += '<div id="topic_button_help" class="topic-button '+(selected == 'help' ? 'selected':'')+'" onclick="topicClick(\'help\')"> help</div>'
 
     for(var i = 0; i < channels.length; i++) {
         html += '<div id="topic_button_'+i+'" class="topic-button '+(selected == i ? 'selected':'')+' '+(isAlarm(i) ? 'alarm':'')+' " onclick="topicClick(\''+i+'\')">#'+channels[i].name+'</div>'
+        url_builder.push(channels[i].tags.join("&"))
     }
+    
+    var hindex = window.location.href.indexOf('#') 
+    if(hindex == -1)
+      hindex = window.location.href.length
+      
+    var new_href = window.location.href.substring(0,hindex) + "#" + url_builder.join(",")
+    if(window.location.href != new_href)
+      window.location.href = new_href
     
     var container = document.getElementById("topic-wrapper")
     container.innerHTML = html  
@@ -75,15 +101,24 @@ function topicClick(id) {
       content_sel_new = true
       content_sel_help = false
       
+      function clink(tags,last) {
+        return "<a href='javascript:;' onclick='channelOpen(\""+tags+"\")'>"+tags+"</a>" + (last?"":" - ")
+        
+      }
+      
       //"<img src='ch_desc.png' style='width:95%;'>"+
       content_el.innerHTML = "<div><b>Open a new channel</b></div>"+
           "<p>Enter channel tags below to start interacting with people using the same tags.</p>"+
           "<p>A channel with multiple tags, like #world and #english, will ONLY listen for messages posted with tags #world and #english. Any message posted from this channel will be visible to people listening to any permutation of the tags, i.e #world, #english, or #world&english.</p>"+
-          
-          "<img src='ch_desc.png' style='width:40%; float:right; margin-right:10px;'>"+
-          "<p>Any direct replies in #world or #english will not be visible to the poster in #world&english, you must join the cross-channel first.</p>"+      
+          "<p>Channel examples:<br/>"+
+          clink('#world') + clink('#world&english') + clink('#world&party') + clink('#us') + clink('#europe') + clink('#asia') + clink('#programming') + clink('#programming&scala',true) + "</p>"+
           "<div><input id='channel_open_input' onkeyup='channelOpenChange(event);' style='width:100%;margin:0px;padding:0px;' type='text' placeholder='tag1 tag2 tag3' />"+
           "<button onclick='channelOpenClick();' style='float:right;margin-top:5px;'>Open (Enter)</button></div>"
+          
+          //"<img src='ch_desc.png' style='width:40%; float:right; margin-right:10px;'>"+
+          //"<p>Any direct replies in #world or #english will not be visible to the poster in #world&english, you must join the cross-channel first.</p>"+      
+          
+          
       content_wrapper.scrollTop = content_wrapper.scrollHeight
   } 
   
@@ -98,13 +133,14 @@ function topicClick(id) {
           "<ul>"+
           "<li><b>/nick &lt;nick&gt; </b>- Set nickname to display</li>"+
           "<li><b>/color &lt;color-name&gt; </b>- Set color to use</li>"+
-          "<li><b>/join &lt;tag&gt; </b>- Join a channel with specified tags</li>"+                
+          "<li><b>/join &lt;tag&gt; </b>- Join a channel with specified tags</li>"+
+          "<li><b>/topic &lt;title&gt; </b>- Join a channel topic.</li>"+
           "<li><b>/close </b>- Close current channel</li>"+
           "<li><b>/clear </b>- Clear all map annotations</li>"+
           
           "</ul>"+
           "<div><b>FAQ</b></div>"+
-          "<p><i>Q: What is the \"Location - &lt;something&gt\" I see in my logs?</i> &lt;something&gt indicates that the message is written from a cross-channel. Type /join &lt;something&gt; in the chat bar to focus in on the conversation</p>"
+          "<p><i>Q: What is the \"uname@location - &lt;something&gt\" I see in my logs?</i> &lt;something&gt indicates that the message is written from a cross-channel. Click on &lt;something&gt; to join the conversation</p>"
         
 
       content_wrapper.scrollTop = content_wrapper.scrollHeight
@@ -122,12 +158,21 @@ function topicClick(id) {
   focusInput()
 }
 
-function channelOpen(tags) {
-    tags = tags.toLowerCase().replace(/#/g,"").replace(/[&,|]/g," ").replace(/\s+/g," ").trim()  
-    var ch = _channelOpen(tags.split(" ")).start()
+function channelOpen(tags,silent) {
+    tags = tags.toLowerCase().replace(/#/g,"").replace(/[&,|]/g," ").replace(/\s+/g," ").trim().split(" ")
+    for(var i = 0; i < channels.length; i++) {
+      var ch = channels[i]
+      if(ch.tags.join(" ") == tags.join(" ")) {
+        topicClick(i)
+        return
+      }
+    }
+    
+    var ch = _channelOpen(tags).start()
     channels.push(ch)
     active_channel_index = channels.length - 1
-    topicClick(active_channel_index)
+    if(!silent)
+      topicClick(active_channel_index)
 }
 
 function channelOpenClick() {  
@@ -168,7 +213,7 @@ function updateLog() {
     log_last_selected = active_channel_index
     log_last_length = logs.length
     
-    if(logs.length > 1000) {
+    if(logs.length > 200) {
         var newlog = []
         for(var i = logs.length - 100; i < logs.length; i++) {
             newlog.push(logs[i])
@@ -210,7 +255,7 @@ function _channelOpen(htags) {
       last_log_self: false,
       last_log_old: false,
       last_log_old_set: false,
-      last_update: new Date().getTime(),
+      last_update: 0,
       logs: [],
       name: htags.join(" &"),
       tags: htags,
@@ -313,6 +358,7 @@ function _channelOpen(htags) {
     
     ob.start = function() {
         var key_filter = appId+","+ob.address() + ","
+        var first = true
         
         // Chat log handler
         function handleResp(resp) {
@@ -338,7 +384,7 @@ function _channelOpen(htags) {
                         ob.last_log_old_set = false
                     }                
                     
-                    if(ob.isPure(msg)) {
+                    if(!first && ob.isPure(msg)) {
                         ob.last_update = new Date().getTime()
                     }
                 }
@@ -355,15 +401,17 @@ function _channelOpen(htags) {
             if(resp.result) {
                 ob.last_uid_seen = resp.result.key.substring(key_filter.length)
             }
+            
+            first = false
         }
         
         // Snapshot query: Fetch some history 
-        db.query(key_filter,"",true,20).then(function(resp){                
+        db.query(key_filter,"",true,50).then(function(resp){                
             handleResp(resp)
             
             // Live query: Track head
             db.live(function(db){            
-                db.query(key_filter,"",true,3).then(function(resp){                
+                db.query(key_filter,"",true,5).then(function(resp){                
                     handleResp(resp)
                 })        
             })
@@ -394,11 +442,11 @@ function chatBarMessage(input) {
   if (input && input.val()) {
       var msg = input.val()
   
-      if(msg.startsWith("/joinsub")) {
-          channelOpen(getActiveChannel().tags + " " + msg.substring("/joinsub".length))
-      }
-      else if(msg.startsWith("/join")) {
+      if(msg.startsWith("/join")) {
           channelOpen(msg.substring("/join".length))
+      }
+      else if(msg.startsWith("/topic")) {
+          channelOpen(getActiveChannel().tags + " " + msg.substring("/topic".length).trim().replace(/\s+/g,"_"))
       }
       else if(msg.startsWith("/close")) {
           channelCloseClick()
@@ -433,11 +481,43 @@ $( document ).ready(function() {
     }
 
     $("#side-nav-button").sideNav();
+    
+    var hist = []
+    var hist_index = -1
 
     var input = $("#input");
     input.keyup(function (e) {
-        if (e.keyCode == 13) {
-            chatBarMessage(input);
+        if (e.keyCode == 13) { // enter
+            if(input.val().trim() != "") {
+                hist.push(input.val())
+                
+                if(hist.length > 100) {
+                  hist = hist.splice(0,50)
+                }
+                
+                hist_index = hist.length
+                chatBarMessage(input);
+            }
+        }
+        else if (e.keyCode == 38) { // up
+          hist_index --
+          
+          if(hist_index < 0)
+              hist_index = 0
+          
+          if(hist.length > hist_index)
+            input.val(hist[hist_index])
+        }
+        else if (e.keyCode == 40) { // down
+          hist_index ++
+          
+          if(hist_index >= hist.length)
+              hist_index = hist.length
+          
+          if(hist.length > hist_index)
+            input.val(hist[hist_index])
+          else
+            input.val("")
         }
     });
     input.focus();

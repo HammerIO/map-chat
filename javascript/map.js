@@ -170,8 +170,12 @@ function linkify(inputText) {
     replacePattern1 = /(#(\S)+)/gim;
     replacedText = intext.replace(replacePattern1, '<a href="javascript:;" onclick="channelOpen(\'$1\');">$1</a>');
 
+    //URLs starting with http://, https://, or ftp:// and ending with .jpg,.png
+    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*?\.(jpg|png|gif))/gim;
+    replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank"><img src="$1" style="max-width:320px;max-height:200px" /></a>');
+    
     //URLs starting with http://, https://, or ftp://
-    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
     replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
 
     //URLs starting with "www." (without // before it, or it'd re-link the ones done above).

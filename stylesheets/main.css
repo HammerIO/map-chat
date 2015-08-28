@@ -53,14 +53,16 @@ html, body, #map-canvas {
     //padding:5px;
     border-radius:5px;
     box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+    padding-bottom:10px;
 }
 
 #content-wrapper {
     margin-top:5px;
     padding: 5px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     font-size:90%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: scroll;
     height:100%;
 }
 
