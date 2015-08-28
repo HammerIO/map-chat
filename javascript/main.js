@@ -274,10 +274,17 @@ function _channelOpen(htags) {
         return same_ch
     }
     
+    function fixLoc(loc) {
+      if(!loc)
+        return "unknown.loc"
+      
+      return loc.replace(/ \(/,".").replace(/\)/,"").toLowerCase()
+    }
+    
     ob.log = function (msg) {
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + (msg.loc || "Unkown location") + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + fixLoc(msg.loc) + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
@@ -305,53 +312,50 @@ function _channelOpen(htags) {
     ob.start = function() {
         var key_filter = appId+","+ob.address() + ","
 
-        // Initial query to find 10th last message
-        db.query(key_filter,true,20).then(function(resp){
-            if(resp.result)
-                ob.last_uid_seen = resp.result.key.substring(key_filter.length)
-            
-            var sessions = {}
-            
-            for(var i = resp.results.length-1; i >= 0; i--) {
-                var res = resp.results[i]          
-                var msg = JSON.parse(res.value)
-                sanitizeMsg(msg)
+        db.live(function(db){            
+            db.query(key_filter,"",ob.last_uid_seen,true,20).then(function(resp){                
+                var sessions = {}                
+                var found_last_end = false
                 
-                sessions[msg.sessionId] = msg
-                ob.log(msg)
-            }
-            
-            for(var sid in sessions) {
-                displayMessageOnMap(sessions[sid])
-            }        
-            
-            ob.log("Last message - " + new Date(uidToTime(ob.last_uid_seen)))
-              
-            // Live query that tracks new messages
-            ob.liveq = db.live(function(db){
-                console.log("liveq update: " + ob.last_uid_seen)
-                db.query(key_filter,ob.last_uid_seen,20,(ob.last_uid_seen.trim() == "") ? 0 : 1).then(function(resp){                
-                    for(var i = 0; i < resp.results.length; i++) {
-                        var res = resp.results[i]
-                        ob.last_uid_seen = res.key.substring(key_filter.length)
-                        var msg = JSON.parse(res.value)
-                        sanitizeMsg(msg)
+                for(var i = resp.results.length-1; i >= 0; i--) {
+                    var res = resp.results[i]          
+                    
+                    if(res.key.substring(key_filter.length) <= ob.last_uid_seen) {
+                        found_last_end = true
+                        continue;
+                    }
+                    
+                    var msg = JSON.parse(res.value)
+                    sanitizeMsg(msg)
+                    
+                    if(!(markersMap[msg.sessionId] || {disabled:false}).disabled) {
+                        sessions[msg.sessionId] = msg
+                        ob.log(msg)
                         
-                        if(!(markersMap[msg.sessionId] || {disabled:false}).disabled) {       
-                            if(ob.last_log_old_set && msg.sessionId == mySessionId) {
-                                ob.last_log_old_set = false
-                            }
-                          
-                            ob.log(msg)
-                            displayMessageOnMap(msg)
-                            if(ob.isPure(msg)) {
-                                ob.last_update = new Date().getTime()
-                            }
+                        if(ob.last_log_old_set && msg.sessionId == mySessionId) {
+                            ob.last_log_old_set = false
+                        }                
+                        
+                        if(ob.isPure(msg)) {
+                            ob.last_update = new Date().getTime()
                         }
                     }
-                })
-            })    
-        })    
+                }
+                
+                if(ob.last_uid_seen != "" && !found_last_end) {
+                    ob.log("Missed some updates..")
+                }
+                
+                for(var sid in sessions) {
+                    displayMessageOnMap(sessions[sid])
+                }
+                
+                if(resp.result) {
+                    ob.last_uid_seen = resp.result.key.substring(key_filter.length)
+                }
+            })
+        
+        })
         
         return this
     }
