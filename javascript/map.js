@@ -68,12 +68,12 @@ function initialize() {
     var mapDiv = document.getElementById('map-canvas');
     map = new google.maps.Map(mapDiv, mapOptions);
 
-    navigator.geolocation.getCurrentPosition(onFirstPosition, onPositionError, locationOptions);
+    navigator.geolocation.getCurrentPosition(onFirstPosition, onPositionError/*, locationOptions*/);
 }
 
 function setupWatchPosition() {
     if (!watchPosition) {
-        watchPosition = navigator.geolocation.watchPosition(onPositionUpdate, onPositionError, locationOptions);
+        watchPosition = navigator.geolocation.watchPosition(onPositionUpdate, onPositionError/*, locationOptions*/);
     }
 }
 
@@ -95,7 +95,7 @@ function onPositionUpdate(position) {
 }
 
 function onPositionError(err) {
-    //Materialize.toast('User location not available :(', 7000);
+    Materialize.toast('User location not available :(', 7000);
     
     if(!mySessionId) {
       $.getJSON("http://ipinfo.io", function(doc){
