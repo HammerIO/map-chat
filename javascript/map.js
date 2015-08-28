@@ -95,7 +95,7 @@ function onPositionUpdate(position) {
 }
 
 function onPositionError(err) {
-    Materialize.toast('User location not available :(', 7000);
+    //Materialize.toast('User location not available :(', 7000);
     
     if(!mySessionId) {
       $.getJSON("http://ipinfo.io", function(doc){
