@@ -81,7 +81,7 @@ function topicClick(id) {
           "<p>A channel with multiple tags, like #world and #english, will ONLY listen for messages posted with tags #world and #english. Any message posted from this channel will be visible to people listening to any permutation of the tags, i.e #world, #english, or #world&english.</p>"+
           
           "<img src='ch_desc.png' style='width:40%; float:right; margin-right:10px;'>"+
-          "<p>Note that any direct replies in #world or #english will not be visible to the poster on #world&english, you must join the cross-channel first.</p>"+      
+          "<p>Any direct replies in #world or #english will not be visible to the poster in #world&english, you must join the cross-channel first.</p>"+      
           "<div><input id='channel_open_input' onkeyup='channelOpenChange(event);' style='width:100%;margin:0px;padding:0px;' type='text' placeholder='tag1 tag2 tag3' />"+
           "<button onclick='channelOpenClick();' style='float:right;margin-top:5px;'>Open (Enter)</button></div>"
       content_wrapper.scrollTop = content_wrapper.scrollHeight
