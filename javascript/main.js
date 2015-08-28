@@ -327,10 +327,20 @@ function _channelOpen(htags) {
       return loc.replace(/ \(/,".").replace(/\)/,"").toLowerCase()
     }
     
+    function ignoreSelfTags(tags) {
+      var ret = []
+      for(var i = 0; i < tags.length; i++) {
+        var t = tags[i]
+        if(ob.tags.indexOf(t) == -1)
+          ret.push(t)
+      }
+      return ret
+    }
+    
     ob.log = function (msg) {
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + fixLoc(msg.loc) + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + msg.tags.join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
+            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + fixLoc(msg.loc) + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
