@@ -159,7 +159,7 @@ function topicClick(id) {
 }
 
 function channelOpen(tags,silent) {
-    tags = tags.toLowerCase().replace(/#/g,"").replace(/[&,|]/g," ").replace(/\s+/g," ").trim().split(" ")
+    tags = tags.toLowerCase().replace(/#/g,"").replace(/[&,|]/g," ").replace(/\s+/g," ").trim().split(" ").sort()
     for(var i = 0; i < channels.length; i++) {
       var ch = channels[i]
       if(ch.tags.join(" ") == tags.join(" ")) {
