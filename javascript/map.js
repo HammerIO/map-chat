@@ -191,11 +191,11 @@ function sanitizeMsg(msg) {
     function html(text) {
         //text = html_sanitize(text);
         
+        text = text.replace(/&(\S{1,4};)/g,"&amp;$1")
+        
         text = text.replace(/[<>卐卍]/g, function (s) {
             return entityMap[s];
-        });
-        
-        text = text.replace(/&(\S{1,4};)/g,"&amp;$1")
+        });        
         
         text = text.replace(/_br_/g,"<br/>")
         
