@@ -187,7 +187,7 @@ function linkify(inputText) {
     replacedText = intext.replace(replacePattern1, '<a href="javascript:;" onclick="channelOpen(\'$1\');">$1</a>');
 
     //URLs starting with http://, https://, or ftp:// and ending with .jpg,.png
-    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*?\.(jpg|png|gif))/gim;
+    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*?\.(jpg|png|gif)(\s+|$))/gim;
     replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank"><img src="$1" style="max-width:320px;max-height:200px" /></a>');
     
     //URLs starting with http://, https://, or ftp://
