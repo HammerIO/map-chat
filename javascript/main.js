@@ -96,10 +96,11 @@ function topicClick(id) {
       content_el.innerHTML = "<div><b>MapChat commands</b></div>"+
           "<p>You can write commands directly into the chat-bar. Following commands are supported:</p>"+
           "<ul>"+
-          "<li><b>/nick &lt;nick&gt; </b>- Sets nickname to display</li>"+
-          "<li><b>/join &lt;tag&gt; </b>- Joins a channel with specified tags</li>"+                
-          "<li><b>/close </b>- Closes current channel</li>"+
-          "<li><b>/clear </b>- Clears all map annotations</li>"+
+          "<li><b>/nick &lt;nick&gt; </b>- Set nickname to display</li>"+
+          "<li><b>/color &lt;color-name&gt; </b>- Set color to use</li>"+
+          "<li><b>/join &lt;tag&gt; </b>- Join a channel with specified tags</li>"+                
+          "<li><b>/close </b>- Close current channel</li>"+
+          "<li><b>/clear </b>- Clear all map annotations</li>"+
           
           "</ul>"+
           "<div><b>FAQ</b></div>"+
