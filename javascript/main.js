@@ -222,7 +222,9 @@ function updateLog() {
     }
     
     content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:75%; text-align:center; font-size:90%; padding:2px; cursor: pointer; background:rgba(33,150,243,0.9); color:white;' onclick='channelCloseClick()'>Close</div>"
-    content_wrapper.scrollTop = content_wrapper.scrollHeight
+    setTimeout(function(){
+      content_wrapper.scrollTop = content_wrapper.scrollHeight
+    },100)
 }
 
 setInterval(updateLog,50)
