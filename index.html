@@ -116,7 +116,14 @@
 
 <script type="text/javascript" src="javascript/modernizr.custom.js"></script>
 <script type="text/javascript" src="javascript/html-sanitizer-minified.js"></script>
+
+<script src="http://hammerio.com/scripts/es6-promise.min.js"></script>
 <script src="http://hammerio.com/scripts/hammer.min.js"></script>
+
+<script>
+  ES6Promise.polyfill() // Required for IE10 and below
+</script>
+
 <script src="javascript/main.js"></script>
 <script src="javascript/map.js"></script>
 
