@@ -96,8 +96,12 @@ function onPositionUpdate(position) {
 }
 
 function onPositionError(err) {
-    //Materialize.toast('User location not available :(', 7000);
-    //console.error('Error(' + err.code + '): ' + err.message);
+    Materialize.toast('User location not available :(', 7000);
+    
+    setUserLocation(64.923542, -44.472656);
+    userLocationName = "unknown.na"
+    initialiseEventBus();
+    map.panTo(userLocation);
 }
 
 function setUserLocation(lat, lng){
