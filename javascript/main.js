@@ -30,8 +30,15 @@ var active_channel_index = 0
 var log_last_selected = 0
 var log_last_length = 0
 
-initChannels()
-updateButtonState()
+function initialiseEventBus(){
+    mySessionId = uid()
+    setupWatchPosition()
+    
+    initChannels()
+    updateButtonState()
+    setInterval(updateLog,50)
+    setInterval(checkAlerts,1000)
+}
 
 function initChannels() {
     var hindex = window.location.href.indexOf('#') 
@@ -45,7 +52,6 @@ function initChannels() {
     
     var chx = window.location.href.substring(hindex).split(',')
     for(var i = 0; i < chx.length; i++) {
-        console.log("open: " + chx[i])
         channelOpen(chx[i],true)
     }
 }
@@ -227,7 +233,7 @@ function updateLog() {
     },100)
 }
 
-setInterval(updateLog,50)
+
 
 function isAlarm(chi) {
     var ch = channels[chi]
@@ -241,8 +247,6 @@ function isAlarm(chi) {
 function checkAlerts() {
     updateButtonState()
 }
-
-setInterval(checkAlerts,1000)
 
 
 function _channelOpen(htags) {
@@ -442,13 +446,6 @@ function _channelOpen(htags) {
     return ob;
 }
 
-
-function initialiseEventBus(){
-    mySessionId = uid()
-    var ch = getActiveChannel()
-    ch.start(topic)
-    setupWatchPosition()    
-}
 
 function chatBarMessage(input) {
   if (input && input.val()) {

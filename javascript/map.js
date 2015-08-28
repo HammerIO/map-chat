@@ -222,7 +222,7 @@ function displayMessageOnMap(msg){
     var newPosition = new google.maps.LatLng(msg.lat,msg.lng);
     var msgSessionId = msg.sessionId;
 
-    if(false && markersMap[msgSessionId]){ // update existing marker
+    if(markersMap[msgSessionId]){ // update existing marker
         var existingMarker = markersMap[msgSessionId].marker;
         var existingInfoWindow = markersMap[msgSessionId].infoWindow;
         var existingTimeoutId = markersMap[msgSessionId].timeoutId;
