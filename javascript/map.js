@@ -68,12 +68,12 @@ function initialize() {
     var mapDiv = document.getElementById('map-canvas');
     map = new google.maps.Map(mapDiv, mapOptions);
 
-    navigator.geolocation.getCurrentPosition(onFirstPosition, onPositionError/*, locationOptions*/);
+    navigator.geolocation.getCurrentPosition(onFirstPosition, onPositionError, locationOptions);
 }
 
 function setupWatchPosition() {
     if (!watchPosition) {
-        watchPosition = navigator.geolocation.watchPosition(onPositionUpdate, onPositionError/*, locationOptions*/);
+        watchPosition = navigator.geolocation.watchPosition(onPositionUpdate, onPositionError, locationOptions);
     }
 }
 
@@ -84,6 +84,7 @@ function onFirstPosition(position){
     })
     initialiseEventBus();
     map.panTo(userLocation);
+    setupWatchPosition()
 }
 
 function onPositionUpdate(position) {
@@ -94,28 +95,67 @@ function onPositionUpdate(position) {
     }
 }
 
+function locTelize() {
+    console.log("Resolving loc using telize.com")
+    $.getJSON("http://www.telize.com/geoip", function(doc){
+      var latlong = [doc.latitude,doc.longitude]
+      
+      setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
+      getLocation(parseFloat(latlong[0]), parseFloat(latlong[1])).then(function(res){
+        userLocationName = res
+      })
+      initialiseEventBus();
+      map.panTo(userLocation);
+      
+    }).error(function(err) {
+      locIpApi()
+    })
+}
+
+function locIpApi() {
+    console.log("Resolving loc using ip-api.com")
+    $.getJSON("http://ip-api.com/json", function(doc){
+      window.resp = doc
+      var latlong = [doc.lat,doc.lon]
+      
+      setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
+      getLocation(parseFloat(latlong[0]), parseFloat(latlong[1])).then(function(res){
+        userLocationName = res
+      })
+      initialiseEventBus();
+      map.panTo(userLocation);
+      
+    }).error(function(err) {
+      locIpInfo()
+    })
+}
+
+function locIpInfo() {
+    console.log("Resolving loc using ipinfo.io")
+    $.getJSON("http://ipinfo.io", function(doc){
+      var latlong = doc.loc.split(",")
+      setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
+      getLocation(parseFloat(latlong[0]), parseFloat(latlong[1])).then(function(res){
+        userLocationName = res
+      })
+      initialiseEventBus();
+      map.panTo(userLocation);
+      
+    }).error(function(err) {
+      setUserLocation(Math.random()*50, Math.random()*60);
+      userLocationName = "unknown.na"
+      initialiseEventBus();
+      map.panTo(userLocation);
+    })
+}
+
 function onPositionError(err) {
     //Materialize.toast('User location not available :(', 7000);
     console.log("User position error")
     window.perr = err
     
     if(!mySessionId) {
-      console.log("Resolving loc using ipinfo.io")
-      $.getJSON("http://ipinfo.io", function(doc){
-        var latlong = doc.loc.split(",")
-        setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
-        getLocation(parseFloat(latlong[0]), parseFloat(latlong[1])).then(function(res){
-          userLocationName = res
-        })
-        initialiseEventBus();
-        map.panTo(userLocation);
-        
-      }, function(err) {
-        setUserLocation(Math.random()*50, Math.random()*60);
-        userLocationName = "unknown.na"
-        initialiseEventBus();
-        map.panTo(userLocation);
-      })
+      locTelize()
     }
 }
 

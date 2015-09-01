@@ -33,7 +33,6 @@ var log_last_update_id = 0
 
 function initialiseEventBus(){
     mySessionId = uid()
-    setupWatchPosition()
     
     initChannels()
     updateButtonState()
