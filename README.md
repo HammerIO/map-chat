@@ -1,7 +1,7 @@
 # MapChat with HammerDB
 A super simple location based chat, forked from [idoco](https://github.com/idoco/map-chat) and modified to use [HammerDB](http://hammerio.com).
 
-[Demo](http://hammerio.github.io/map-chat)
+[Demo](http://hammerio.github.io/map-chat/#feedback,world)
 
 ## Changes
 - August 31, 2015 - Added topic header for channels.
@@ -31,5 +31,5 @@ A super simple location based chat, forked from [idoco](https://github.com/idoco
 - Please search the existing issues for your bug and create a new one only if the issue is not yet tracked!
 - Feel free to fork this project and suggest new features as pull requests.
 
-## [Demo](http://hammerio.github.io/map-chat)
+## [Demo](http://hammerio.github.io/map-chat/#feedback,world)
 This demo is hosted on GitHub pages and uses HammerDB for communication.
