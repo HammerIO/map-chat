@@ -29,7 +29,7 @@ var channels = []
 var active_channel_index = 0
 
 var log_last_selected = 0
-var log_last_length = 0
+var log_last_update_id = 0
 
 function initialiseEventBus(){
     mySessionId = uid()
@@ -200,7 +200,7 @@ function channelOpenChange(e) {
 
 function updateLog() {
     if(content_sel_new || content_sel_help) {
-        log_last_length = 0
+        log_last_update_id = 0
         return
     }
 
@@ -210,11 +210,11 @@ function updateLog() {
       
     var logs = ch.logs
     
-    if(log_last_selected == active_channel_index && log_last_length == logs.length)
+    if(log_last_selected == active_channel_index && log_last_update_id == ch.last_update_id)
         return
     
     log_last_selected = active_channel_index
-    log_last_length = logs.length    
+    log_last_update_id = ch.last_update_id
     
     var button  = "<div style='text-align:center; font-size:90%; padding:2px; cursor: pointer; background:rgba(33,150,243,0.9); color:white;' onclick='channelCloseClick()'>Close</div>"
     
@@ -224,11 +224,11 @@ function updateLog() {
     }
     
     var sub_logs = []
-    for(var i = Math.max(subs.length - 10,0); i < subs.length; i++) {
+    for(var i = Math.max(subs.length - 15,0); i < subs.length; i++) {
       sub_logs.push(ch.sub_logs[subs[i]])
     }
     
-    content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:78%; overflow:hidden; background:rgb(220,230,250); border-bottom: 1px solid rgba(0,0,0,0.1)'>"+button + "<div style='padding:3px; width:500px;'>" +  sub_logs.join("<br/>")+"</div></div>"
+    content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:78%; background:rgb(220,230,250); border-bottom: 1px solid rgba(0,0,0,0.1)'>"+button + "<div style='width:96%;overflow:hidden;font-size:90%;'><div style='width:2000px;margin:3px;'>" +  sub_logs.join("<br/>")+"</div></div></div>"
     content_wrapper.scrollTop = content_wrapper.scrollHeight + 100
     
     setTimeout(function(){
@@ -265,6 +265,7 @@ function _channelOpen(htags) {
       last_log_old: false,
       last_log_old_set: false,
       last_update: 0,
+      last_update_id: 1,
       logs: [],
       sub_logs: {},
       name: htags.join(" &"),
@@ -347,7 +348,7 @@ function _channelOpen(htags) {
       return ret
     }
     
-    ob.log = function (msg) {        
+    ob.log = function (msg) {
         if(ob.logs.length > 400) {
             ob.logs.splice(0,300)
         }
@@ -368,9 +369,9 @@ function _channelOpen(htags) {
                 delete ob.sub_logs[id] // Move post to end (hack, i know..)
               }
             
-              ob.sub_logs[id] = ("<i style='font-size:80%;'>" + 
-                (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + 
-                (("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
+              ob.sub_logs[id] = ("<i>" + 
+                ((" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + 
+                (("<span style='color:grey;'>"+(msg.text || "joined")+"</span>")))
             }
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
@@ -378,6 +379,7 @@ function _channelOpen(htags) {
         
         ob.last_log = new Date().getTime()
         ob.last_log_old = false
+        ob.last_update_id += 1
     }
 
     ob.checkLog = function() {
