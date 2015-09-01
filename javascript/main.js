@@ -224,11 +224,11 @@ function updateLog() {
     }
     
     var sub_logs = []
-    for(var i = Math.max(subs.length - 10,0); i < subs.length; i++) {
+    for(var i = Math.max(subs.length - 15,0); i < subs.length; i++) {
       sub_logs.push(ch.sub_logs[subs[i]])
     }
     
-    content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:78%; background:rgb(220,230,250); border-bottom: 1px solid rgba(0,0,0,0.1)'>"+button + "<div style='width:96%;overflow:hidden;'><div style='padding:3px; width:500px;'>" +  sub_logs.join("<br/>")+"</div></div></div>"
+    content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:78%; background:rgb(220,230,250); border-bottom: 1px solid rgba(0,0,0,0.1)'>"+button + "<div style='width:96%;overflow:hidden;font-size:90%;'><div style='width:2000px;margin:3px;'>" +  sub_logs.join("<br/>")+"</div></div></div>"
     content_wrapper.scrollTop = content_wrapper.scrollHeight + 100
     
     setTimeout(function(){
@@ -369,9 +369,9 @@ function _channelOpen(htags) {
                 delete ob.sub_logs[id] // Move post to end (hack, i know..)
               }
             
-              ob.sub_logs[id] = ("<i style='font-size:80%;'>" + 
-                (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + 
-                (("<span style='color:grey;font-size:80%;'>"+(msg.text || "joined")+"</span>")))
+              ob.sub_logs[id] = ("<i>" + 
+                ((" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + 
+                (("<span style='color:grey;'>"+(msg.text || "joined")+"</span>")))
             }
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
