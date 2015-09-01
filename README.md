@@ -4,6 +4,7 @@ A super simple location based chat, forked from [idoco](https://github.com/idoco
 [Demo](http://hammerio.github.io/map-chat)
 
 ## Changes
+- August 31, 2015 - Added topic header for channels.
 - August 26, 2015 - Added support for channels.
 - August 24, 2015 - Added basic history. Last 10 conversations are loaded at start.
 
