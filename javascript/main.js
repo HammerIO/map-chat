@@ -102,7 +102,7 @@ function updateButtonState() {
 }
 
 function topicClick(id) {  
-  console.log("topicClick: " + id)
+  //console.log("topicClick: " + id)
 
   if(id == 'adm') {
       content_sel_new = true
