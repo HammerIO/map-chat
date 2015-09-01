@@ -14,14 +14,15 @@ var content_sel_help = false
 
 var nick = localStorage["mapchat_nick"]
 var nick_color = localStorage["mapchat_nick_color"]
+
 if(!nick) {
-  nick = (Math.floor(Math.random()*100)).toString()
-  localStorage["mapchat_nick"] = nick
+    nick = (Math.floor(Math.random()*100)).toString()
+    localStorage["mapchat_nick"] = nick
 }
 
 if(!nick_color) {
-  nick_color = "purple"
-  localStorage["mapchat_nick_color"] = nick_color
+    nick_color = "purple"
+    localStorage["mapchat_nick_color"] = nick_color
 }
 
 var channels = []
@@ -90,11 +91,11 @@ function updateButtonState() {
     
     var hindex = window.location.href.indexOf('#') 
     if(hindex == -1)
-      hindex = window.location.href.length
+        hindex = window.location.href.length
       
     var new_href = window.location.href.substring(0,hindex) + "#" + url_builder.join(",")
     if(window.location.href != new_href)
-      window.location.href = new_href
+        window.location.href = new_href
     
     var container = document.getElementById("topic-wrapper")
     container.innerHTML = html  
@@ -112,7 +113,6 @@ function topicClick(id) {
         
       }
       
-      //"<img src='ch_desc.png' style='width:95%;'>"+
       content_el.innerHTML = "<div><b>Open a new channel</b></div>"+
           "<p>Enter channel tags below to start interacting with people using the same tags.</p>"+
           "<p>A channel with multiple tags, like #world and #english, will ONLY listen for messages posted with tags #world and #english. Any message posted from this channel will be visible to people listening to any permutation of the tags, i.e #world, #english, or #world&english.</p>"+
@@ -120,10 +120,6 @@ function topicClick(id) {
           clink('#world') + clink('#world&gifs') + clink('#world&english') + clink('#world&party') + clink('#europe') + clink('#us') + clink('#asia') + clink('#programming') + clink('#programming&scala')  + clink('#feedback',true) + "</p>"+
           "<div><input id='channel_open_input' onkeyup='channelOpenChange(event);' style='width:100%;margin:0px;padding:0px;' type='text' placeholder='tag1 tag2 tag3' />"+
           "<button onclick='channelOpenClick();' style='float:right;margin-top:5px;'>Open (Enter)</button></div>"
-          
-          //"<img src='ch_desc.png' style='width:40%; float:right; margin-right:10px;'>"+
-          //"<p>Any direct replies in #world or #english will not be visible to the poster in #world&english, you must join the cross-channel first.</p>"+      
-          
           
       content_wrapper.scrollTop = content_wrapper.scrollHeight
   } 
@@ -138,15 +134,16 @@ function topicClick(id) {
           "<p>You can write commands directly into the chat-bar. Following commands are supported:</p>"+
           "<ul>"+
           "<li><b>/nick &lt;nick&gt; </b>- Set nickname to display</li>"+
-          "<li><b>/color &lt;color-name&gt; </b>- Set color to use</li>"+
-          "<li><b>/join &lt;tag&gt; </b>- Join a channel with specified tags</li>"+
+          "<li><b>/color &lt;color&gt; </b>- Set color to use</li>"+
+          "<li><b>/join &lt;tags&gt; </b>- Join a channel</li>"+
           "<li><b>/topic &lt;title&gt; </b>- Join a channel topic.</li>"+
           "<li><b>/close </b>- Close current channel</li>"+
+          "<li><b>/leave </b>- Alias for close</li>"+
           "<li><b>/clear </b>- Clear all map annotations</li>"+
           
           "</ul>"+
           "<div><b>FAQ</b></div>"+
-          "<p><i>Q: What is the \"uname@location - &lt;something&gt\" I see in my logs?</i> &lt;something&gt indicates that the message is written from a cross-channel. Click on &lt;something&gt; to join the conversation</p>"
+          "<p><i>Q: What is the #&lt;something&gt I see at top?</i> <span style='white-space:nowrap'>#&lt;something&gt</span> indicates that the message is written from a cross-channel. Click on <span style='white-space:nowrap'>#&lt;something&gt;</span> to join the conversation</p>"
         
 
       content_wrapper.scrollTop = content_wrapper.scrollHeight
@@ -217,17 +214,21 @@ function updateLog() {
         return
     
     log_last_selected = active_channel_index
-    log_last_length = logs.length
+    log_last_length = logs.length    
     
-    if(logs.length > 200) {
-        var newlog = []
-        for(var i = logs.length - 100; i < logs.length; i++) {
-            newlog.push(logs[i])
-        }
-        ch.logs = newlog
+    var button  = "<div style='text-align:center; font-size:90%; padding:2px; cursor: pointer; background:rgba(33,150,243,0.9); color:white;' onclick='channelCloseClick()'>Close</div>"
+    
+    var subs = []
+    for(var k in ch.sub_logs) {
+      subs.push(k)
     }
     
-    content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:75%; text-align:center; font-size:90%; padding:2px; cursor: pointer; background:rgba(33,150,243,0.9); color:white;' onclick='channelCloseClick()'>Close</div>"
+    var sub_logs = []
+    for(var i = Math.max(subs.length - 10,0); i < subs.length; i++) {
+      sub_logs.push(ch.sub_logs[subs[i]])
+    }
+    
+    content_el.innerHTML = "<br/>" + logs.join("<br/>") + "<div style='position:absolute; top:0px; width:78%; overflow:hidden; background:rgb(220,230,250); border-bottom: 1px solid rgba(0,0,0,0.1)'>"+button + "<div style='padding:3px; width:500px;'>" +  sub_logs.join("<br/>")+"</div></div>"
     content_wrapper.scrollTop = content_wrapper.scrollHeight + 100
     
     setTimeout(function(){
@@ -265,6 +266,7 @@ function _channelOpen(htags) {
       last_log_old_set: false,
       last_update: 0,
       logs: [],
+      sub_logs: {},
       name: htags.join(" &"),
       tags: htags,
       liveq: undefined
@@ -345,10 +347,31 @@ function _channelOpen(htags) {
       return ret
     }
     
-    ob.log = function (msg) {
+    ob.log = function (msg) {        
+        if(ob.logs.length > 400) {
+            ob.logs.splice(0,300)
+        }
+    
         if(msg.lat) {
             var same_ch = ob.isPure(msg)
-            ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + fixLoc(msg.loc) + (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
+            if(same_ch) {
+            
+              ob.logs.push("<i style='font-size:80%;'>" + (msg.nick?(msg.nick + "@") : "") + 
+                fixLoc(msg.loc) + 
+                (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + 
+                ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + 
+                (same_ch?("<span style='color:"+(msg.nick_color || "purple")+";'>"+(msg.text || "joined")+"</span>"):("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
+                
+            } else {
+              var id = msg.tags.join("&")
+              if(ob.sub_logs[id]) {
+                delete ob.sub_logs[id] // Move post to end (hack, i know..)
+              }
+            
+              ob.sub_logs[id] = ("<i style='font-size:80%;'>" + 
+                (same_ch?"":(" <a href='javascript:;' onclick='channelOpen(\""+msg.tags.join("&")+"\")'>#" + ignoreSelfTags(msg.tags).join("&")+'</a>')) + ":</i> " + 
+                (("<span style='color:grey'>"+(msg.text || "joined")+"</span>")))
+            }
         } else {
             ob.logs.push("<i style='font-size:80%;'>" + msg + "</i>")
         }
