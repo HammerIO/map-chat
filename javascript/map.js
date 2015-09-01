@@ -68,12 +68,12 @@ function initialize() {
     var mapDiv = document.getElementById('map-canvas');
     map = new google.maps.Map(mapDiv, mapOptions);
 
-    navigator.geolocation.getCurrentPosition(onFirstPosition, onPositionError, locationOptions);
+    navigator.geolocation.getCurrentPosition(onFirstPosition, onPositionError/*, locationOptions*/);
 }
 
 function setupWatchPosition() {
     if (!watchPosition) {
-        watchPosition = navigator.geolocation.watchPosition(onPositionUpdate, onPositionError, locationOptions);
+        watchPosition = navigator.geolocation.watchPosition(onPositionUpdate, onPositionError/*, locationOptions*/);
     }
 }
 
@@ -81,7 +81,6 @@ function onFirstPosition(position){
     setUserLocation(position.coords.latitude, position.coords.longitude);
     getLocation(position.coords.latitude, position.coords.longitude).then(function(res){
         userLocationName = res
-        //getActiveChannel().publish("")
     })
     initialiseEventBus();
     map.panTo(userLocation);
@@ -96,8 +95,25 @@ function onPositionUpdate(position) {
 }
 
 function onPositionError(err) {
-    //Materialize.toast('User location not available :(', 7000);
-    //console.error('Error(' + err.code + '): ' + err.message);
+    Materialize.toast('User location not available :(', 7000);
+    
+    if(!mySessionId) {
+      $.getJSON("http://ipinfo.io", function(doc){
+        var latlong = doc.loc.split(",")
+        setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
+        getLocation(parseFloat(latlong[0]), parseFloat(latlong[1])).then(function(res){
+          userLocationName = res
+        })
+        initialiseEventBus();
+        map.panTo(userLocation);
+        
+      }, function(err) {
+        setUserLocation(Math.random()*50, Math.random()*60);
+        userLocationName = "unknown.na"
+        initialiseEventBus();
+        map.panTo(userLocation);
+      })
+    }
 }
 
 function setUserLocation(lat, lng){
@@ -170,8 +186,12 @@ function linkify(inputText) {
     replacePattern1 = /(#(\S)+)/gim;
     replacedText = intext.replace(replacePattern1, '<a href="javascript:;" onclick="channelOpen(\'$1\');">$1</a>');
 
+    //URLs starting with http://, https://, or ftp:// and ending with .jpg,.png
+    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*?\.(jpg|png|gif)(\s+|$))/gim;
+    replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank"><img src="$1" style="max-width:320px;max-height:200px" /></a>');
+    
     //URLs starting with http://, https://, or ftp://
-    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
     replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
 
     //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
@@ -189,13 +209,13 @@ function linkify(inputText) {
 // xss prevention hack
 function sanitizeMsg(msg) {    
     function html(text) {
-        text = html_sanitize(text);
+        //text = html_sanitize(text);
+        
+        text = text.replace(/&(\S{1,4};)/g,"&amp;$1")
         
         text = text.replace(/[<>卐卍]/g, function (s) {
             return entityMap[s];
-        });
-        
-        text = text.replace(/&(\S{1,5};)/g,"&amp;$1")
+        });        
         
         text = text.replace(/_br_/g,"<br/>")
         

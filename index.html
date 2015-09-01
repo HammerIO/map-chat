@@ -26,7 +26,7 @@
 <div class="navbar-fixed">
     <nav>
         <div class="nav-wrapper blue">
-            <a class="brand-logo center" href="https://github.com/HammerIO/map-chat">MapChat <span style="font-size:30%">A HammerIO fork</span></a>
+            <a class="brand-logo center" target="_blank" href="https://github.com/HammerIO/map-chat">MapChat <span style="font-size:30%">A HammerIO fork</span></a>
             <a id="side-nav-button" href="#" data-activates="side-nav"><i class="mdi-navigation-menu"></i></a>
             <ul class="side-nav" id="side-nav">
                 <li>
@@ -81,17 +81,22 @@
     <div id="topic-wrapper">  
         <div id="topic_button_adm" class="topic-button" onclick="topicClick('adm')"> new</div>
         <div id="topic_button_help" class="topic-button" onclick="topicClick('help')"> help</div>
-        <div id="topic_button_0" class="topic-button" onclick="topicClick('0')">#start</div>
+        <div id="topic_button_0" class="topic-button" onclick="topicClick('0')">#world</div>
     </div>
 
     <div id="content-wrapper">
         <div id="content"></div>
     </div>
+    
+    <div id="topic_and_content_resize">
+      <img id="topic_and_content_resize_img" src="images/resize.png" width=16 height=16 />
+    </div>
+    
 </div>
 
 <div class="center input-wrapper">
     <div class="input-field">
-        <input placeholder="Type a message" id="input" type="text" maxlength="101">
+        <input placeholder="Type a message" id="input" type="text" maxlength="201">
     </div>
 </div>
 
@@ -116,7 +121,14 @@
 
 <script type="text/javascript" src="javascript/modernizr.custom.js"></script>
 <script type="text/javascript" src="javascript/html-sanitizer-minified.js"></script>
+
+<script src="http://hammerio.com/scripts/es6-promise.min.js"></script>
 <script src="http://hammerio.com/scripts/hammer.min.js"></script>
+
+<script>
+  ES6Promise.polyfill() // Required for IE10 and below
+</script>
+
 <script src="javascript/main.js"></script>
 <script src="javascript/map.js"></script>
 

@@ -1,6 +1,8 @@
 # MapChat with HammerDB
 A super simple location based chat, forked from [idoco](https://github.com/idoco/map-chat) and modified to use [HammerDB](http://hammerio.com).
 
+[Demo](http://hammerio.github.io/map-chat)
+
 ## Changes
 - August 26, 2015 - Added support for channels.
 - August 24, 2015 - Added basic history. Last 10 conversations are loaded at start.
