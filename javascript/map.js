@@ -155,7 +155,7 @@ function onPositionError(err) {
     window.perr = err
     
     if(!mySessionId) {
-      locIpApi()
+      locIpInfo()
     }
 }
 
