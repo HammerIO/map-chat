@@ -95,9 +95,12 @@ function onPositionUpdate(position) {
 }
 
 function onPositionError(err) {
-    Materialize.toast('User location not available :(', 7000);
+    //Materialize.toast('User location not available :(', 7000);
+    console.log("User position error")
+    window.perr = err
     
     if(!mySessionId) {
+      console.log("Resolving loc using ipinfo.io")
       $.getJSON("http://ipinfo.io", function(doc){
         var latlong = doc.loc.split(",")
         setUserLocation(parseFloat(latlong[0]), parseFloat(latlong[1]));
@@ -187,8 +190,8 @@ function linkify(inputText) {
     replacedText = intext.replace(replacePattern1, '<a href="javascript:;" onclick="channelOpen(\'$1\');">$1</a>');
 
     //URLs starting with http://, https://, or ftp:// and ending with .jpg,.png
-    replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*?\.(jpg|png|gif)(\s+|$))/gim;
-    replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank"><img src="$1" style="max-width:320px;max-height:200px" /></a>');
+    //replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*?\.(jpg|png|gif)(\s+|$))/gim;
+    //replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank"><img src="$1" style="max-width:320px;max-height:200px" /></a>');
     
     //URLs starting with http://, https://, or ftp://
     replacePattern1 = /((\s+|^)(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;

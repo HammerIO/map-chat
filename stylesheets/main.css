@@ -58,7 +58,7 @@ html, body, #map-canvas {
 
 #content-wrapper {
     margin-top:5px;
-    padding: 5px;
+    padding: 2%;
     padding-bottom: 10px;
     font-size:90%;
     overflow-x: hidden;
@@ -77,7 +77,7 @@ html, body, #map-canvas {
     width:20%;
     border-radius:5px 0px 0px 0px;    
     height:100%;
-    margin-right:5px;
+    //margin-right:1%;
 }
 
 #topic_and_content_resize {
